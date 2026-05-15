@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jadwal Lab Komputer - UNISAP</title>
+    <style>
+        /* --- STYLE UTAMA --- */
+        * {margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Segoe UI',Arial,sans-serif;background:linear-gradient(135deg,#1e3c72 0%,#2a5298 100%);min-height:100vh;padding:20px}
+        .container{max-width:1300px;margin:0 auto;background:white;border-radius:15px;box-shadow:0 10px 30px rgba(0,0,0,0.3);overflow:hidden}
+        .header{background:#0d47a1;color:white;padding:25px;text-align:center}
+        .header img{width:70px;height:70px;margin-bottom:10px;border-radius:50%;border:3px solid white}
+        .header h1{font-size:26px;margin-bottom:5px}
+        .content{padding:25px}
+        .info{background:#e3f2fd;padding:15px;border-radius:8px;margin-bottom:15px;border-left:4px solid #1976d2}
+        .controls{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:15px;align-items:center}
+        .btn{padding:10px 18px;background:#1976d2;color:white;border:none;border-radius:5px;cursor:pointer;font-size:14px}
+        .btn:hover{background:#0d47a1}
+        .btn-wa{background:#25D366;text-decoration:none;display:inline-flex;align-items:center}
+        .btn-wa:hover{background:#128C7E}
+        .month-select, .year-select{padding:10px;border:2px solid #1976d2;border-radius:5px;font-size:14px;font-weight:600}
+        
+        /* --- STYLE TABEL --- */
+        table{width:100%;border-collapse:collapse;margin-top:10px;font-size:12px}
+        th,td{border:1px solid #ddd;padding:6px;text-align:center;min-width:85px;vertical-align:top}
+        th{background-color:#1976d2;color:white;font-weight:600}
+        tr:nth-child(even){background-color:#f5f5f5}
+        td{cursor:pointer;height:85px;transition: all 0.2s ease;}
+        
+        .jam{font-weight:bold;background:#bbdefb!important;width:100px;cursor:default!important;font-size:11px;vertical-align: middle;}
+        
+        /* --- INDIKATOR WARNA STATUS --- */
+        .slot-kosong {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+        .slot-kosong:hover {
+            background-color: #c8e6c9;
+        }
+        .badge-kosong {
+            display: inline-block;
+            padding: 2px 6px;
+            background: #2e7d32;
+            color: white;
+            font-size: 9px;
+            border-radius: 3px;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+
+        .slot-terisi {
+            background-color: #ffebee!important;
+            color: #c62828;
+            cursor: pointer;
+        }
+        .slot-terisi:hover {
+            background-color: #ffcdd2!important;
+        }
+        .booking {
+            font-size: 10px;
+            padding: 2px;
+            line-height: 1.3;
+            text-align: left;
+        }
+        .booking strong {
+            display: block;
+            color: #c62828;
+            font-size: 11px;
+            margin-bottom: 2px;
+        }
+        .badge-terisi {
+            display: inline-block;
+            padding: 2px 5px;
+            background: #d32f2f;
+            color: white;
+            font-size: 9px;
+            border-radius: 3px;
+            font-weight: bold;
+            margin-bottom: 3px;
+        }
+        
+        .footer{text-align:center;padding:15px;color:#666;font-size:13px;border-top:1px solid #eee}
+        
+        /* --- STYLE MODAL / FORM --- */
+        .modal{display:none;position:fixed;z-index:1000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.6);overflow:auto}
+        .modal-content{background:white;margin:3% auto;padding:25px;border-radius:10px;width:90%;max-width:500px}
+        .modal h2{margin-bottom:15px;color:#0d47a1;font-size:22px}
+        .form-group{margin-bottom:12px}
+        .form-group label{display:block;margin-bottom:4px;font-weight:600;font-size:14px}
+        .form-group input{width:100%;padding:9px;border:1px solid #ddd;border-radius:5px;font-size:14px}
+        .close{float:right;font-size:28px;font-weight:bold;cursor:pointer;color:#999}
+        .close:hover{color:#000}
+        
+        /* --- STYLE RESPONSIVE (HP & TABLET) --- */
+        @media(max-width:768px){
+            .content {
+                overflow-x: auto;
+                padding: 15px;
+            }
+            table {
+                font-size: 11px;
+                min-width: 700px;
+            }
+            th, td {
+                padding: 6px 4px;
+            }
+            td {
+                height: 90px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="LOGO_SAN_PEDRO.png" alt="Logo UNISAP">
+            <img src="kampus_berdampak.png" alt="kampus_berdampak">
+            <img src="tutwuri_handayani.png" alt="tutwuri_handayani">
+            <h1>JADWAL PEMAKAIAN LAB KOMPUTER</h1>
+            <p>UNIVERSITAS SAN PEDRO - Kupang</p>
+        </div>
+        <div class="content">
+            <div class="info">
+                <strong>Aturan:</strong> Kotak <span style="color:#2e7d32;font-weight:bold">Hijau</span> berarti kosong. Kotak <span style="color:#c62828;font-weight:bold">Merah</span> telah terjadwal. Klik kotak untuk aksi.
+            </div>
+            
+            <div class="controls">
+                <select id="bulanSelect" class="month-select" onchange="gantiBulanAtauTahun()">
+                    <option value="1">Januari</option><option value="2">Februari</option><option value="3">Maret</option>
+                    <option value="4">April</option><option value="5">Mei</option><option value="6">Juni</option>
+                    <option value="7">Juli</option><option value="8">Agustus</option><option value="9">September</option>
+                    <option value="10">Oktober</option><option value="11">November</option><option value="12">Desember</option>
+                </select>
+                
+                <select id="tahunSelect" class="year-select" onchange="gantiBulanAtauTahun()">
+                    <option value="2026">2026</option>
+                    <option value="2027">2027</option>
+                    <option value="2028">2028</option>
+                    <option value="2029">2029</option>
+                    <option value="2030">2030</option>
+                </select>
+
+                <button class="btn" onclick="resetTable()">🔄 Reset Jadwal Bulan Ini</button>
+                <a href="https://wa.me/6281269239404" target="_blank" class="btn btn-wa">📱 Chat Ketua Lab</a>
+            </div>
+            
+            <table id="jadwal">
+                <thead>
+                    <tr>
+                        <th>JAM</th><th>SENIN</th><th>SELASA</th><th>RABU</th><th>KAMIS</th><th>JUMAT</th><th>SABTU</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="jam">08.00-09.40</td>
+                        <td onclick="openForm(this)"></td><td onclick="openForm(this)"></td><td onclick="openForm(this)"></td>
+                        <td onclick="openForm(this)"></td><td onclick="openForm(this)"></td><td onclick="openForm(this)"></td>
+                    </tr>
+                    <tr>
+                        <td class="jam">09.40-11.20</td>
+                        <td onclick="openForm(this)"></td><td onclick="openForm(this)"></td><td onclick="openForm(this)"></td>
+                        <td onclick="openForm(this)"></td><td onclick="openForm(this)"></td><td onclick="openForm(this)"></td>
+                    </tr>
+                    <tr>
+                        <td class="jam">11.20-13.00</td>
+                        <td onclick="openForm(this)"></td><td onclick="openForm(this)"></td><td onclick="openForm(this)"></td>
+                        <td onclick="openForm(this)"></td><td onclick="openForm(this)"></td><td onclick="openForm(this)"></td>
+                    </tr>
+                    <tr>
+                        <td class="jam">13.00-14.40</td>
+                        <td onclick="openForm(this)"></td><td onclick="openForm(this)"></td><td onclick="openForm(this)"></td>
+                        <td onclick="openForm(this)"></td><td onclick="openForm(this)"></td><td onclick="openForm(this)"></td>
+                    </tr>
+                    <tr>
+                        <td class="jam">14.40-16.20</td>
+                        <td onclick="openForm(this)"></td><td onclick="openForm(this)"></td><td onclick="openForm(this)"></td>
+                        <td onclick="openForm(this)"></td><td onclick="openForm(this)"></td><td onclick="openForm(this)"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="footer">© 2026 Lab Komputer UNISAP | Validasi: 081269239404</div>
+    </div>
+
+    <div id="bookingModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeForm()">&times;</span>
+            <h2>Form Booking Lab</h2>
+            <p id="jadwalInfo" style="margin-bottom:15px;color:#1976d2;font-weight:bold"></p>
+            <form id="bookingForm" onsubmit="return false;">
+                <div class="form-group">
+                    <label>Tanggal Pemakaian:</label>
+                    <input type="date" id="tanggal" required>
+                </div>
+                <div class="form-group">
+                    <label>Nama Pemesan:</label>
+                    <input type="text" id="nama" required>
+                </div>
+                <div class="form-group">
+                    <label>NIM:</label>
+                    <input type="text" id="nim" required>
+                </div>
+                <div class="form-group">
+                    <label>Prodi:</label>
+                    <input type="text" id="prodi" placeholder="Teknik Informatika" required>
+                </div>
+                <div class="form-group">
+                    <label>Semester:</label>
+                    <input type="number" id="semester" min="1" max="14" required>
+                </div>
+                <div class="form-group">
+                    <label>Nama Mata Kuliah:</label>
+                    <input type="text" id="matkul" placeholder="Pemrograman Web / Struktur Data" required>
+                </div>
+                <div class="form-group">
+                    <label>Keperluan / Materi:</label>
+                    <input type="text" id="keperluan" placeholder="Praktikum Basis Data" required>
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 15px;">
+                    <button type="button" class="btn btn-wa" onclick="submitBooking()" style="flex: 2;">📱 Kirim & Validasi via WA</button>
+                    <button type="button" id="btnHapus" class="btn" onclick="hapusBooking()" style="background:#f44336; flex: 1; display: none;">🗑️ Hapus</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+<script>
+    let currentCell = null;
+    let currentBulan = new Date().getMonth() + 1;
+    let currentTahun = new Date().getFullYear();
+
+    window.onload = function() {
+        document.getElementById('bulanSelect').value = currentBulan;
+        // Cek jika tahun sekarang ada di list dropdown, jika tidak default ke opsi pertama
+        if (document.querySelector(`#tahunSelect option[value="${currentTahun}"]`)) {
+            document.getElementById('tahunSelect').value = currentTahun;
+        } else {
+            currentTahun = document.getElementById('tahunSelect').value;
+        }
+        loadData();
+    };
+
+    function gantiBulanAtauTahun() {
+        if(confirm('Ubah filter waktu? Jadwal di bulan/tahun lama akan disembunyikan.')) {
+            currentBulan = document.getElementById('bulanSelect').value;
+            currentTahun = document.getElementById('tahunSelect').value;
+            loadData();
+        } else {
+            // Kembalikan ke pilihan sebelumnya jika batal
+            document.getElementById('bulanSelect').value = currentBulan;
+            document.getElementById('tahunSelect').value = currentTahun;
+        }
+    }
+
+    function setCellToKosong(cell) {
+        cell.className = 'slot-kosong';
+        cell.innerHTML = `<div>-</div><span class="badge-kosong">KOSONG</span>`;
+        cell.removeAttribute('data-booking');
+    }
+
+    function openForm(cell) {
+        if (cell.classList.contains('jam')) return;
+        currentCell = cell;
+        
+        let headerRow = cell.closest('table').rows[0];
+        let hari = headerRow.cells[cell.cellIndex].innerText;
+        let jam = cell.parentNode.cells[0].innerText;
+        let bulanText = document.getElementById('bulanSelect').options[document.getElementById('bulanSelect').selectedIndex].text;
+        
+        document.getElementById('jadwalInfo').innerText = `${hari}, ${jam} - ${bulanText} ${currentTahun}`;
+        
+        if (cell.getAttribute('data-booking')) {
+            let data = JSON.parse(cell.getAttribute('data-booking'));
+            document.getElementById('tanggal').value = data.tanggal;
+            document.getElementById('nama').value = data.nama;
+            document.getElementById('nim').value = data.nim;
+            document.getElementById('prodi').value = data.prodi;
+            document.getElementById('semester').value = data.semester;
+            document.getElementById('matkul').value = data.matkul || ''; 
+            document.getElementById('keperluan').value = data.keperluan;
+            document.getElementById('btnHapus').style.display = 'block'; 
+        } else {
+            document.getElementById('bookingForm').reset();
+            let today = new Date().toISOString().split('T')[0];
+            document.getElementById('tanggal').value = today;
+            document.getElementById('btnHapus').style.display = 'none'; 
+        }
+        
+        document.getElementById('bookingModal').style.display = 'block';
+    }
+
+    function closeForm() {
+        document.getElementById('bookingModal').style.display = 'none';
+        document.getElementById('bookingForm').reset();
+    }
+
+    function submitBooking() {
+        const tanggal = document.getElementById('tanggal').value;
+        const nama = document.getElementById('nama').value;
+        const nim = document.getElementById('nim').value;
+        const prodi = document.getElementById('prodi').value;
+        const semester = document.getElementById('semester').value;
+        const matkul = document.getElementById('matkul').value;
+        const keperluan = document.getElementById('keperluan').value;
+
+        if (!tanggal || !nama || !nim || !prodi || !semester || !matkul || !keperluan) {
+            alert('Lengkapi semua data!');
+            return;
+        }
+
+        let headerRow = currentCell.closest('table').rows[0];
+        let hari = headerRow.cells[currentCell.cellIndex].innerText;
+        let jam = currentCell.parentNode.cells[0].innerText;
+        let bulanText = document.getElementById('bulanSelect').options[document.getElementById('bulanSelect').selectedIndex].text;
+
+        let bookingData = {tanggal, nama, nim, prodi, semester, matkul, keperluan, hari, jam, bulan: bulanText, tahun: currentTahun};
+        currentCell.setAttribute('data-booking', JSON.stringify(bookingData));
+        
+        let tglFormat = new Date(tanggal).toLocaleDateString('id-ID');
+        
+        currentCell.className = 'slot-terisi';
+        currentCell.innerHTML = `
+            <div class="booking">
+                <span class="badge-terisi">TERJADWAL</span>
+                <strong>${nama}</strong>
+                <span style="color:#b71c1c;font-weight:600;">MK: ${matkul}</span><br>
+                Tgl: ${tglFormat}<br>
+                ${prodi} (S${semester})
+            </div>`;
+        
+        saveData();
+        
+        alert(`🔔 NOTIFIKASI SISTEM:\n\nBooking lokal berhasil disimpan!\nSistem akan mengalihkan Anda ke WhatsApp Ketua Lab untuk proses validasi akhir.`);
+
+        const teksPesan = `📢 *NOTIFIKASI PENGANDUAN JADWAL LAB KOMPUTER UNISAP*\n` +
+                          `--------------------------------------------------\n` +
+                          `Halo Ketua Lab, saya ingin mengajukan permohonan validasi penggunaan ruangan dengan data berikut:\n\n` +
+                          `📅 *WAKTU PELAKSANAAN*\n` +
+                          `• Hari/Tanggal : ${hari}, ${tglFormat}\n` +
+                          `• Jam Sesi     : ${jam}\n` +
+                          `• Bulan/Tahun  : ${bulanText} ${currentTahun}\n\n` +
+                          `👤 *IDENTITAS PEMESAN*\n` +
+                          `• Nama Lengkap : ${nama}\n` +
+                          `• NIM          : ${nim}\n` +
+                          `• Program Studi: ${prodi}\n` +
+                          `• Semester     : ${semester}\n\n` +
+                          `📚 *INFORMASI KEGIATAN*\n` +
+                          `• Mata Kuliah  : ${matkul}\n` +
+                          `• Keperluan    : ${keperluan}\n\n` +
+                          `--------------------------------------------------\n` +
+                          `_Mohon diperiksa kembali dan diberikan validasi persetujuan. Terima kasih._`;
+
+        // Menggunakan window.location.href agar ramah browser HP & tidak diblokir pop-up blocker
+        window.location.href = `https://wa.me/6281269239404?text=${encodeURIComponent(teksPesan)}`;
+        
+        closeForm();
+    }
+
+    function hapusBooking() {
+        if(confirm('Hapus booking ini?')) {
+            setCellToKosong(currentCell);
+            saveData();
+            closeForm();
+        }
+    }
+
+    function saveData() {
+        let key = `jadwalLab_${currentTahun}_${currentBulan}`;
+        let table = document.getElementById('jadwal');
+        let data = [];
+        for (let i = 1; i < table.rows.length; i++) {
+            for (let j = 1; j < table.rows[i].cells.length; j++) {
+                let cell = table.rows[i].cells[j];
+                if(cell.getAttribute('data-booking')) {
+                    data.push({row: i, col: j, booking: cell.getAttribute('data-booking'), html: cell.innerHTML, className: cell.className});
+                }
+            }
+        }
+        localStorage.setItem(key, JSON.stringify(data));
+    }
+
+    function loadData() {
+        let cells = document.querySelectorAll('#jadwal td');
+        cells.forEach(cell => {
+            if (!cell.classList.contains('jam')) {
+                setCellToKosong(cell); 
+            }
+        });
+
+        let key = `jadwalLab_${currentTahun}_${currentBulan}`;
+        let data = JSON.parse(localStorage.getItem(key));
+        if (data) {
+            let table = document.getElementById('jadwal');
+            data.forEach(item => {
+                if (table.rows[item.row] && table.rows[item.row].cells[item.col]) {
+                    let cell = table.rows[item.row].cells[item.col];
+                    cell.innerHTML = item.html;
+                    cell.setAttribute('data-booking', item.booking);
+                    cell.className = item.className || 'slot-terisi'; 
+                }
+            });
+        }
+    }
+
+    function resetTable() {
+        let bulanText = document.getElementById('bulanSelect').options[document.getElementById('bulanSelect').selectedIndex].text;
+        if(confirm(`Yakin hapus semua booking bulan ${bulanText} tahun ${currentTahun}?`)) {
+            let key = `jadwalLab_${currentTahun}_${currentBulan}`;
+            localStorage.removeItem(key);
+            loadData();
+        }
+    }
+
+    window.onclick = function(event) {
+        let modal = document.getElementById('bookingModal');
+        if (event.target == modal) closeForm();
+    }
+</script>
+</body>
+</html>
